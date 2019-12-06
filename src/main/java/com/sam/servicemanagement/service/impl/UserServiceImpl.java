@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sam.servicemanagement.domain.User;
 import com.sam.servicemanagement.repository.UserRepository;
+import com.sam.servicemanagement.repository.UserRoleRepository;
+import com.sam.servicemanagement.security.crypto.password.PasswordEncoder;
 import com.sam.servicemanagement.service.UserService;
 import com.sam.servicemanagement.service.dto.UserDTO;
 import com.sam.servicemanagement.service.mapper.UserMapper;
@@ -20,14 +22,18 @@ import com.sam.servicemanagement.service.mapper.UserMapper;
 public class UserServiceImpl implements UserService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-//	private final PasswordEncoder passwordEncoder;
+	private final PasswordEncoder passwordEncoder;
 	private final UserRepository userRepository;
+	private final UserRoleRepository userRoleRepository;
 	private final UserMapper userMapper;
 
-	public UserServiceImpl(final UserRepository userRepository, final UserMapper userMapper) {
-//		this.passwordEncoder = passwordEncoder;
+	public UserServiceImpl(final UserRepository userRepository, final UserMapper userMapper,
+			final PasswordEncoder passwordEncoder, final UserRoleRepository userRoleRepository) {
+		this.passwordEncoder = passwordEncoder;
 		this.userRepository = userRepository;
+		this.userRoleRepository = userRoleRepository;
 		this.userMapper = userMapper;
+		this.userMapper.setUserRoleRepository(this.userRoleRepository);
 	}
 
 	/**
@@ -38,9 +44,10 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public UserDTO save(final UserDTO userDTO) {
-//		final String encryptedPassword = passwordEncoder.encode(userDTO.getPassword());
+		final String encryptedPassword = passwordEncoder.encode(userDTO.getPassword());
 		logger.debug("Request to save UserDTO : " + userDTO.toString());
 		final User user = userMapper.UserDTOtoUser(userDTO);
+		user.setPassword(encryptedPassword);
 		userRepository.save(user);
 		return userMapper.userToUserDTO(user);
 	}

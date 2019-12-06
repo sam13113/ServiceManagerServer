@@ -61,7 +61,7 @@ public class UserResource {
 			throws URISyntaxException, BadRequestAlertException {
 		log.debug("REST request to save a User : " + userDTO);
 		if (userDTO.getId() != null) {
-			throw new BadRequestAlertException("A new kPI cannot already have an ID", ENTITY_NAME, "idexists");
+			throw new BadRequestAlertException("A new user cannot already have an ID", ENTITY_NAME, "id_exists");
 		}
 		final UserDTO result = userService.save(userDTO);
 		return new ResponseEntity<>(result, HttpStatus.CREATED);
@@ -76,17 +76,23 @@ public class UserResource {
 	 *         userDTO is not valid, or with status
 	 *         {@code 500 (Internal Server Error)} if the userDTO couldn't be
 	 *         updated.
-	 * @throws URISyntaxException if the Location URI syntax is incorrect.
+	 * @throws URISyntaxException if the Location URI syntax is incorrect,
+	 *                            NoSuchElementException if no user is found in db.
+	 * 
 	 */
 	@PutMapping("/users")
-	public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody final UserDTO userDTO)
+	public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody final UserDTO currentUserDTO)
 			throws URISyntaxException, BadRequestAlertException {
-		log.debug("REST request to update a User : " + userDTO);
-		if (userDTO.getId() != null) {
-			throw new BadRequestAlertException("A new kPI cannot already have an ID", ENTITY_NAME, "idexists");
+		log.debug("REST request to update a User : " + currentUserDTO);
+		if (currentUserDTO.getId() != null) {
+			@SuppressWarnings("unused")
+			final UserDTO userDTO = userService.findOne(currentUserDTO.getId()).get();
+			final UserDTO result = userService.save(currentUserDTO);
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} else {
+			throw new BadRequestAlertException("User not found", ENTITY_NAME, "id_null");
 		}
-		final UserDTO result = userService.save(userDTO);
-		return new ResponseEntity<>(result, HttpStatus.OK);
+
 	}
 
 	/**
@@ -111,7 +117,7 @@ public class UserResource {
 	 *         the userDTO, or with status {@code 404 (Not Found)}.
 	 */
 	@GetMapping("/users/{id}")
-	public ResponseEntity<UserDTO> getKPI(@PathVariable final Long id) {
+	public ResponseEntity<UserDTO> getUser(@PathVariable final Long id) {
 		log.debug("REST request to get User : {}", id);
 		final Optional<UserDTO> userDTO = userService.findOne(id);
 		return new ResponseEntity<UserDTO>(userDTO.get(), HttpStatus.OK);
@@ -124,7 +130,7 @@ public class UserResource {
 	 * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
 	 */
 	@DeleteMapping("/users/{id}")
-	public ResponseEntity<Void> deleteKPI(@PathVariable final Long id) {
+	public ResponseEntity<Void> deleteUser(@PathVariable final Long id) {
 		log.debug("REST request to delete User : {}", id);
 		userService.delete(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);

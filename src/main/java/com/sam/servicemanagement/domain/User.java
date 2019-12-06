@@ -1,14 +1,22 @@
 package com.sam.servicemanagement.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -16,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sam.servicemanagement.config.Constants;
-import com.sun.istack.NotNull;
 
 /**
  * User Table entity class
@@ -59,6 +66,9 @@ public class User implements Serializable {
 	@NotNull
 	@Column(nullable = false)
 	private boolean activated = false;
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "role_id"))
+	private final List<UserRole> roles = new ArrayList<>();
 
 // From this line onwards getters & setters
 	public Long getUser_id() {
@@ -117,6 +127,14 @@ public class User implements Serializable {
 		this.activated = activated;
 	}
 
+	public Collection<UserRole> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(final List<UserRole> roles) {
+		this.roles.addAll(roles);
+	}
+
 	public static Logger getLog() {
 		return log;
 	}
@@ -149,7 +167,8 @@ public class User implements Serializable {
 	@Override
 	public String toString() {
 		return "User{" + "login='" + login_name + '\'' + ", firstName='" + first_name + '\'' + ", lastName='"
-				+ last_name + '\'' + ", email='" + email + '\'' + ", activated='" + activated + '\'' + "}";
+				+ last_name + '\'' + ", email='" + email + '\'' + ", activated='" + activated + '\'' + ", Roles ='"
+				+ roles.toString() + '\'' + "}";
 	}
 
 }

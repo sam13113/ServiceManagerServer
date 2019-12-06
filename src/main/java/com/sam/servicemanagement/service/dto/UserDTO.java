@@ -1,12 +1,17 @@
 package com.sam.servicemanagement.service.dto;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.sam.servicemanagement.config.Constants;
 import com.sam.servicemanagement.domain.User;
+import com.sam.servicemanagement.domain.UserRole;
 
 /**
  * A DTO representing a user, with his authorities
@@ -32,6 +37,8 @@ public class UserDTO {
 	private boolean activated = false;
 	@Size(max = 60)
 	private String password;
+	@NotNull
+	private List<String> roles;
 
 	public UserDTO() {
 		// Empty contructor for Jackson
@@ -45,6 +52,7 @@ public class UserDTO {
 		this.email = user.getEmail();
 		this.activated = user.isActivated();
 		this.password = user.getPassword();
+		this.roles = user.getRoles().stream().map(UserRole::getRoleName).collect(Collectors.toList());
 
 	}
 
@@ -105,10 +113,19 @@ public class UserDTO {
 		this.password = password;
 	}
 
+	public List<String> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(final List<String> roles) {
+		this.roles = roles;
+	}
+
 	@Override
 	public String toString() {
 		return "UserDTO{" + "login='" + loginName + '\'' + ", firstName='" + firstName + '\'' + ", lastName='"
-				+ lastName + '\'' + ", email='" + email + '\'' + ", activated=" + activated + "}";
+				+ lastName + '\'' + ", email='" + email + '\'' + ", activated=" + activated + '\'' + ", roles=" + roles
+				+ "}";
 	}
 
 }

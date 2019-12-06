@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.sam.servicemanagement.domain.User;
+import com.sam.servicemanagement.domain.UserRole;
+import com.sam.servicemanagement.repository.UserRoleRepository;
 import com.sam.servicemanagement.service.dto.UserDTO;
 
 /**
@@ -18,6 +20,11 @@ import com.sam.servicemanagement.service.dto.UserDTO;
  */
 @Service
 public class UserMapper {
+	private UserRoleRepository userRoleRepository;
+
+	public UserMapper() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public List<UserDTO> usersToUserDTOs(final List<User> userList) {
 		return userList.stream().filter(Objects::nonNull).map(this::userToUserDTO).collect(Collectors.toList());
@@ -41,11 +48,28 @@ public class UserMapper {
 			user.setLogin_name(userDTO.getLoginName());
 			user.setUser_id(userDTO.getId());
 			user.setPassword(userDTO.getPassword());
+			setUserRoleRepository(userRoleRepository);
+			final List<UserRole> userRoles = userDTO.getRoles().stream().filter(Objects::nonNull)
+					.map(this::createUserRole).collect(Collectors.toList());
+
+			user.setRoles(userRoles);
 			return user;
 		} else {
 			return null;
 		}
 
+	}
+
+	private UserRole createUserRole(final String userRole) {
+		return this.getUserRoleRepository().findByRoleName(userRole);
+	}
+
+	public UserRoleRepository getUserRoleRepository() {
+		return userRoleRepository;
+	}
+
+	public void setUserRoleRepository(final UserRoleRepository userRoleRepository) {
+		this.userRoleRepository = userRoleRepository;
 	}
 
 }
