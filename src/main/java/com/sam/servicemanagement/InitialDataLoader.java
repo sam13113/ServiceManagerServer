@@ -9,10 +9,22 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sam.servicemanagement.domain.Country;
+import com.sam.servicemanagement.domain.Department;
+import com.sam.servicemanagement.domain.OperationalEntity;
+import com.sam.servicemanagement.domain.Portfolio;
 import com.sam.servicemanagement.domain.Privilege;
+import com.sam.servicemanagement.domain.Region;
+import com.sam.servicemanagement.domain.Services;
 import com.sam.servicemanagement.domain.User;
 import com.sam.servicemanagement.domain.UserRole;
+import com.sam.servicemanagement.repository.CountryRepository;
+import com.sam.servicemanagement.repository.DepartmentRepository;
+import com.sam.servicemanagement.repository.OperationalEntityRepository;
+import com.sam.servicemanagement.repository.PortfolioRepository;
 import com.sam.servicemanagement.repository.PrivilegesRepository;
+import com.sam.servicemanagement.repository.RegionRepository;
+import com.sam.servicemanagement.repository.ServicesRepository;
 import com.sam.servicemanagement.repository.UserRepository;
 import com.sam.servicemanagement.repository.UserRoleRepository;
 import com.sam.servicemanagement.security.crypto.password.PasswordEncoder;
@@ -30,6 +42,24 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 
 	@Autowired
 	private PrivilegesRepository privilegeRepository;
+	@Autowired
+	private RegionRepository regionRepository;
+
+	@Autowired
+	private CountryRepository countryRepository;
+
+	@Autowired
+	private OperationalEntityRepository operationalEntityRepository;
+
+	@Autowired
+	private ServicesRepository servicesRepository;
+
+	@Autowired
+	private DepartmentRepository departmentRepository;
+
+	@Autowired
+	private PortfolioRepository portfolioRepository;
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
@@ -68,6 +98,43 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		user.setRoles(Arrays.asList(userRole));
 		user.setActivated(true);
 		userRepository.save(user);
+
+		final Region region = new Region();
+		region.setRegionName("Europe");
+		regionRepository.save(region);
+
+		final Country country = new Country();
+		country.setRegion(region);
+		country.setCountryCode("DE");
+		country.setCountryName("Germany");
+		countryRepository.save(country);
+
+		final OperationalEntity oe = new OperationalEntity();
+		oe.setCountry(country);
+		oe.setOeName("AzGermany");
+		operationalEntityRepository.save(oe);
+
+		final Services services = new Services();
+		services.setOperationalEntity(oe);
+		services.setDescription("Design and develop new requests as well as support already available projects");
+		services.setServiceName("CustomerService");
+		servicesRepository.save(services);
+
+		final Department department = new Department();
+		department.setDepartmentCode("CPS");
+		department.setDepartmentName("CustomerServicesDepartment");
+		departmentRepository.save(department);
+
+		final Portfolio portfolio = new Portfolio();
+		portfolio.setDepartment(department);
+		portfolio.setServices(services);
+		portfolio.setBusinessWeightage(25);
+		portfolio.setPortfolioDescription("A portfolio like ontimedelivery");
+		portfolio.setPortfolioName("ABBS");
+		portfolio.setPortfolioOwner(5L);
+		portfolio.setSolution("a solution");
+		portfolio.setStrategy("a strategy");
+		portfolioRepository.save(portfolio);
 
 		alreadySetup = true;
 	}
